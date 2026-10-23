@@ -6,11 +6,23 @@ import toga
 from toga.style.pack import COLUMN, ROW
 from datetime import date
 import calendar
+import json
+from pathlib import Path
+
+WASTE_TYPES = [
+    "General waste",
+    "Food waste",
+    "Cardboard recycling",
+    "Plastic recycling",
+    "Glass recycling",
+    "Metal recycling"
+]
 
 
 class WasteApp(toga.App):
     def startup(self):
-        """Construct and show the Toga application.
+        """
+        Main window of the wasteapp.
 
         Usually, you would add your application to a main content box.
         We then create a main window (with a name matching the app), and
@@ -21,10 +33,14 @@ class WasteApp(toga.App):
         self.displayed_month = self.today.month
         self.selected_day = self.today
 
+        # load collection schedule
+        self.collection_rules = self.load_collection_rules()
+
+
         main_box = toga.Box(direction=COLUMN,
                             margin=10)
         
-        name_label = toga.Label("Next trash day:",
+        name_label = toga.Label("Waste collection calendar:",
                                 margin = (0, 5))
         main_box.add(name_label)
 
@@ -42,7 +58,8 @@ class WasteApp(toga.App):
         self.month_label = toga.Label(
             "",
             margin=5,
-            flex=1
+            flex=1,
+            text_align = "center"
         )
 
         next_button = toga.Button(
@@ -65,17 +82,86 @@ class WasteApp(toga.App):
 
         self.selected_label = toga.Label(
             "",
-            margin=5
+            margin=(10, 5)
         )
         main_box.add(self.selected_label)
 
-        self.render_calendar()
+        self.collection_list = toga.Box(
+            direction=COLUMN,
+            margin=5
+        )
 
+        main_box.add(self.collection_list)
 
         self.main_window = toga.MainWindow(title=self.formal_name)
         self.main_window.content = main_box
+
+        self.render_calendar()
         self.main_window.show()
-    
+
+
+    def load_collection_rules(self):
+        """Load the collection rules from the json file"""
+        rules_file = Path(__file__).parent / "collection_rules.json"
+
+        with rules_file.open("r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        rules = []
+
+        for rule in data["rules"]:
+            start_date = date.fromisoformat(rule["start_date"])
+
+            rules.append({
+                "type": rule["type"],
+                "start_date": start_date,
+                "interval_weeks": int(rule["interval_weeks"]),
+                "weekday": rule["weekday"].lower(),
+                "colour": rule["colour"],
+            })
+
+            # ensure the date occurs on the right weekday
+            expected_weekday = start_date.strftime("%A").lower()
+            if rule["weekday"].lower() != expected_weekday:
+                print(
+                    f"Warning: {rule['type']} starts on "
+                    f"{expected_weekday}, not {rule['weekday']}."
+                )
+
+        return rules
+
+    def collection_rules_for_day(self, day):
+        """Return all collection rules that apply on a date."""
+        collections = []
+
+        for rule in self.collection_rules:
+            start = rule["start_date"]
+            interval_days = rule["interval_weeks"] * 7
+
+            days_since_start = (day - start).days
+
+            if days_since_start < 0:
+                continue
+
+            # Ensure the collection is on the correct weekday
+            # and the correct recurring week.
+            if day.weekday() != start.weekday():
+                continue
+
+            if days_since_start % interval_days != 0:
+                continue
+
+            collections.append(rule)
+
+        return collections
+
+
+    def collection_for_day(self, day):
+        """Return waste type for a date"""
+        return [
+            rule["type"]
+            for rule in self.collection_rules_for_day(day)
+        ]
 
     def render_calendar(self):
         self.today = date.today()
@@ -121,32 +207,68 @@ class WasteApp(toga.App):
 
         for week in weeks:
             week_box = toga.Box(
-                direction=ROW
+                direction=ROW,
+                flex=1
             )
 
             for day in week:
                 if day == 0:
-                    cell = toga.Box(flex=1, margin=2)
-                else:
-                    current_date = date(
-                        self.displayed_year,
-                        self.displayed_month,
-                        day
+                    week_box.add(
+                        toga.Box(flex=1, margin=2)
                     )
-                    label = str(day)
+                    continue
 
-                    if current_date == self.today:
-                        label = f"[{day}]"
-                    button = toga.Button(
-                        label,
-                        on_press=lambda widget, 
-                        d=current_date:
-                            self.selected_date(d),
-                        flex=1,
-                        margin=2
+                current_date = date(
+                    self.displayed_year,
+                    self.displayed_month,
+                    day
+                )
+                collections = self.collection_rules_for_day(current_date)
+
+                is_today = current_date == self.today
+                is_selected = current_date == self.selected_day
+
+                colour_row = toga.Box(
+                    direction=ROW,
+                    flex=1
+                )
+
+                for rule in collections:
+                    colour_row.add(
+                        toga.Box(
+                            flex=1,
+                            background_color=rule["colour"]
+                        )
                     )
 
-                    cell = button
+                if not collections:
+                    colour_row.add(
+                        toga.Box(
+                            flex=1
+                        )
+                    )
+
+                button = toga.Button(
+                    str(day),
+                    on_press=lambda widget, d=current_date:
+                        self.selected_date(d),
+                    flex=1,
+                    margin=2
+                )
+
+                if is_today:
+                    button.style.background_color = "#2583E8"
+                    button.style.color = "#FFFFFF"
+                elif is_selected:
+                    button.style.background_color = "#DCEBFA"
+
+                cell = toga.Box(
+                    direction=COLUMN,
+                    flex=1,
+                    margin=2
+                )
+                cell.add(colour_row)
+                cell.add(button)
                 week_box.add(cell)
             self.calendar_box.add(week_box)
         self.update_selected_label()
@@ -156,9 +278,41 @@ class WasteApp(toga.App):
         self.render_calendar()
 
     def update_selected_label(self):
+        day = self.selected_day
+
         self.selected_label.text = (
-            f"Selected date: {self.selected_day.strftime('%d %B %Y')}"
+            f"Collections for {day.strftime('%A, %d %B %Y')}"
         )
+
+        self.collection_list.clear()
+
+        collections = self.collection_rules_for_day(day)
+
+        if not collections:
+            self.collection_list.add(
+                toga.Label("No waste collection scheduled.")
+            )
+            return
+
+        for rule in collections:
+            colour_swatch = toga.Box(
+                width=18,
+                height=18,
+                background_color=rule["colour"],
+                margin=(0, 8, 0, 0)
+            )
+
+            collection_row = toga.Box(
+                direction=ROW,
+                margin=3,
+                align_items="center"
+            )
+            collection_row.add(colour_swatch)
+            collection_row.add(
+                toga.Label(rule["type"], flex=1)
+            )
+
+            self.collection_list.add(collection_row)
 
     def previous_month(self, widget):
         if self.displayed_month == 1:

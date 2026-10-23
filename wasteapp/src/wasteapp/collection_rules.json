@@ -1,0 +1,47 @@
+
+{
+    "rules": [
+        {
+            "type": "General waste",
+            "start_date": "2026-10-27",
+            "interval_weeks": 2,
+            "weekday": "tuesday",
+            "colour": "#000000"
+        },
+        {
+            "type": "Food waste",
+            "start_date": "2026-10-27",
+            "interval_weeks": 2,
+            "weekday": "tuesday",
+            "colour": "#07b307"
+        },
+        {
+            "type": "Cardboard recycling",
+            "start_date": "2026-10-29",
+            "interval_weeks": 2,
+            "weekday": "thursday",
+            "colour": "#d4a760"
+        },
+        {
+            "type": "Plastic recycling",
+            "start_date": "2026-10-29",
+            "interval_weeks": 2,
+            "weekday": "thursday",
+            "colour": "#d86edf"
+        },
+        {
+            "type": "Glass recycling",
+            "start_date": "2026-11-09",
+            "interval_weeks": 4,
+            "weekday": "monday",
+            "colour": "#a7eca7"
+        },
+        {
+            "type": "Metal recycling",
+            "start_date": "2026-11-09",
+            "interval_weeks": 4,
+            "weekday": "monday",
+            "colour": "#808080"
+        }
+    ]
+}
