@@ -232,7 +232,9 @@ class WasteApp(toga.App):
                     direction=ROW,
                     height=8,
                     flex=1,
-                    margin=2
+                    # margin=(0,0,0,4),
+                    margin=0,
+                    align_items="center"
                 )
 
                 if collections:
@@ -251,13 +253,6 @@ class WasteApp(toga.App):
                         )
                     )
 
-                # if not collections:
-                #     colour_row.add(
-                #         toga.Box(
-                #             flex=1
-                #         )
-                #     )
-
                 button = toga.Button(
                     str(day),
                     on_press=lambda widget, d=current_date:
@@ -275,7 +270,8 @@ class WasteApp(toga.App):
                 cell = toga.Box(
                     direction=COLUMN,
                     flex=1,
-                    margin=2
+                    margin=2,
+                    align_items="center"
                 )
                 cell.add(colour_row)
                 cell.add(button)
