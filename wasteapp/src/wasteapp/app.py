@@ -230,30 +230,40 @@ class WasteApp(toga.App):
 
                 colour_row = toga.Box(
                     direction=ROW,
-                    flex=1
+                    height=8,
+                    flex=1,
+                    margin=2
                 )
 
-                for rule in collections:
+                if collections:
+                    for rule in collections:
+                        colour_row.add(
+                            toga.Box(
+                                flex=1,
+                                background_color=rule["colour"]
+                            )
+                        )
+                else:
                     colour_row.add(
                         toga.Box(
                             flex=1,
-                            background_color=rule["colour"]
+                            background_color="#EEEEEE"
                         )
                     )
 
-                if not collections:
-                    colour_row.add(
-                        toga.Box(
-                            flex=1
-                        )
-                    )
+                # if not collections:
+                #     colour_row.add(
+                #         toga.Box(
+                #             flex=1
+                #         )
+                #     )
 
                 button = toga.Button(
                     str(day),
                     on_press=lambda widget, d=current_date:
                         self.selected_date(d),
                     flex=1,
-                    margin=2
+                    margin=0
                 )
 
                 if is_today:
