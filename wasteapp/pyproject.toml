@@ -22,6 +22,7 @@ test_sources = [
 ]
 
 requires = [
+    "toga",
 ]
 test_requires = [
     "pytest",
@@ -162,6 +163,25 @@ requires = [
 requires = [
     "toga-android~=0.5.0",
 ]
+android_manifest_extra_content = """
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+"""
+
+android_manifest_application_extra_content = """
+<receiver
+    android:name="com.example.wasteapp.NotificationReceiver"
+    android:enabled="true"
+    android:exported="false">
+
+    <intent-filter>
+        <action android:name="com.example.wasteapp.COLLECTION_REMINDER" />
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+    </intent-filter>
+
+</receiver>
+"""
 
 base_theme = "Theme.MaterialComponents.Light.DarkActionBar"
 
@@ -174,6 +194,18 @@ build_gradle_dependencies = [
     # Needed for WebView
     # "androidx.webkit:webkit:1.15.0",
 ]
+
+build_gradle_extra_content = """
+android {
+    sourceSets {
+        main {
+            java {
+                srcDirs += [project.file("../../../../../src/wasteapp/android/java")]
+            }
+        }
+    }
+}
+"""
 
 # Needed for WebView
 # build_gradle_extra_content="""

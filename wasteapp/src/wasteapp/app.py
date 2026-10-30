@@ -8,6 +8,9 @@ from datetime import date
 import calendar
 import json
 from pathlib import Path
+from .notifications import enable_notifications
+from .notifications import schedule_test_notification
+
 
 WASTE_TYPES = [
     "General waste",
@@ -39,6 +42,15 @@ class WasteApp(toga.App):
 
         main_box = toga.Box(direction=COLUMN,
                             margin=10)
+
+        # FOR TESTING, REMOVE
+        test_notification_button = toga.Button(
+            "Test notification (2 minutes)",
+            on_press=self.test_notification,
+            margin=5
+        )
+
+        main_box.add(test_notification_button)
         
         name_label = toga.Label("Waste collection calendar:",
                                 margin = (0, 5))
@@ -98,6 +110,12 @@ class WasteApp(toga.App):
 
         self.render_calendar()
         self.main_window.show()
+
+        # enable collection reminders
+        enable_notifications(
+            self,
+            self.collection_rules
+        )
 
 
     def load_collection_rules(self):
@@ -337,6 +355,28 @@ class WasteApp(toga.App):
             self.displayed_month += 1
 
         self.render_calendar()
+
+    # def send_notification(self, title, message):
+    #     PythonActivity = autoclass('org.beeware.android.MainActivity')
+    #     NotificationManager = autoclass('android.app.NotificationManager')
+    #     NotificationBuilder = autoclass('android.app.Notification$Builder')
+
+    #     String = autoclass('java.lang.String')
+
+    #     activity = PythonActivity.singletonThis
+    #     manager = activity.getSystemService(activity.NOTIFICATION_SERVICE)
+
+    #     builder = NotificationBuilder(activity)
+    #     builder.setContentTitle(String(title))
+    #     builder.setContentText(String(message))
+    #     builder.setSmallIcon(activity.getApplicationInfo().icon)
+    #     builder.setAutoCancel(True)
+
+    #     notification = builder.build()
+    #     manager.notify(1, notification)
+
+    def test_notification(self, widget):
+        schedule_test_notification(self, 120)
 
 
 def main():
