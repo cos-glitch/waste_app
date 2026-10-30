@@ -3,7 +3,7 @@ App to track trash days
 """
 
 import toga
-from toga.style.pack import COLUMN, ROW
+from toga.style.pack import COLUMN, ROW, Pack
 from datetime import date
 import calendar
 import json
@@ -44,17 +44,16 @@ class WasteApp(toga.App):
                             margin=10)
 
         # FOR TESTING, REMOVE
-        test_notification_button = toga.Button(
-            "Test notification (2 minutes)",
-            on_press=self.test_notification,
-            margin=5
-        )
-
-        main_box.add(test_notification_button)
+        # test_notification_button = toga.Button(
+        #     "Test notification (2 minutes)",
+        #     on_press=self.test_notification,
+        #     margin=5
+        # )
+        # main_box.add(test_notification_button)
         
-        name_label = toga.Label("Waste collection calendar:",
-                                margin = (0, 5))
-        main_box.add(name_label)
+        # name_label = toga.Label("Waste collection calendar:",
+        #                         margin = (0, 5))
+        # main_box.add(name_label)
 
         # month navigation
         navigation = toga.Box(
@@ -71,7 +70,9 @@ class WasteApp(toga.App):
             "",
             margin=5,
             flex=1,
-            text_align = "center"
+            text_align = "center",
+            font_weight="bold",
+            font_size=20
         )
 
         next_button = toga.Button(
@@ -88,7 +89,8 @@ class WasteApp(toga.App):
         # calendar
         self.calendar_box = toga.Box(
             direction=COLUMN, 
-            margin=5)
+            margin=2,
+            flex=1)
         
         main_box.add(self.calendar_box)
 
@@ -100,13 +102,19 @@ class WasteApp(toga.App):
 
         self.collection_list = toga.Box(
             direction=COLUMN,
-            margin=5
+            margin=5,
+            height=120
         )
 
         main_box.add(self.collection_list)
 
         self.main_window = toga.MainWindow(title=self.formal_name)
-        self.main_window.content = main_box
+        self.main_window.content = toga.ScrollContainer(
+            content=main_box,
+            horizontal=False,
+            vertical=True,
+            style=Pack(flex=1)
+        )
 
         self.render_calendar()
         self.main_window.show()
@@ -196,7 +204,8 @@ class WasteApp(toga.App):
         # weekday headings
         weekday_box = toga.Box(
             direction=ROW,
-            flex=1
+            flex=1,
+            margin=0
         )
 
         for day_name in ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]:
@@ -288,7 +297,7 @@ class WasteApp(toga.App):
                 cell = toga.Box(
                     direction=COLUMN,
                     flex=1,
-                    margin=2,
+                    margin=1,
                     align_items="center"
                 )
                 cell.add(colour_row)
@@ -380,4 +389,6 @@ class WasteApp(toga.App):
 
 
 def main():
-    return WasteApp()
+    return WasteApp(
+        icon="icons/myicon"
+    )
