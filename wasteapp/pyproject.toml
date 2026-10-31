@@ -14,6 +14,8 @@ formal_name = "Waste App"
 description = "App to track trash days"
 long_description = """More details about the app should go here.
 """
+icon = "icons/wasteapp"
+
 sources = [
     "src/wasteapp",
 ]

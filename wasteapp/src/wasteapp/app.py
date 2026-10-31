@@ -389,6 +389,4 @@ class WasteApp(toga.App):
 
 
 def main():
-    return WasteApp(
-        icon="icons/myicon"
-    )
+    return WasteApp()
